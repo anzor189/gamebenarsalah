@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full select-none">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Uji Ketangkasan Benar / Salah - Sistem Pernapasan SD</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Outfit', 'sans-serif'],
+            display: ['Fredoka', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              blue: '#1e40af',
+              cyan: '#0284c7',
+              neonGreen: '#10b981',
+              neonRed: '#ef4444',
+              neonAmber: '#f59e0b',
+            }
+          },
+          animation: {
+            'pulse-fast': 'pulse 0.8s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'bounce-gentle': 'bounce 2s infinite',
+            'glow-green': 'glowGreen 1s ease-in-out infinite alternate',
+            'glow-red': 'glowRed 1s ease-in-out infinite alternate',
+          },
+          keyframes: {
+            glowGreen: {
+              '0%': { boxShadow: '0 0 15px rgba(16, 185, 129, 0.4)' },
+              '100%': { boxShadow: '0 0 40px rgba(16, 185, 129, 0.9)' },
+            },
+            glowRed: {
+              '0%': { boxShadow: '0 0 15px rgba(239, 68, 68, 0.4)' },
+              '100%': { boxShadow: '0 0 40px rgba(239, 68, 68, 0.9)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom 3D & Glassmorphism styles */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+    
+    .glass-card {
+      background: rgba(30, 41, 59, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    /* 3D Button Effects */
+    .btn-3d {
+      transition: all 0.12s ease-in-out;
+      transform: translateY(0);
+      position: relative;
+    }
+    .btn-3d:active {
+      transform: translateY(6px) !important;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.5) !important;
+    }
+
+    .btn-3d-blue {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      box-shadow: 0 8px 0 #1e3a8a, 0 12px 20px rgba(0,0,0,0.4);
+      border: 1px solid #60a5fa;
+    }
+
+    .btn-3d-green {
+      background: linear-gradient(135deg, #10b981, #047857);
+      box-shadow: 0 8px 0 #064e3b, 0 12px 20px rgba(0,0,0,0.4);
+      border: 1px solid #34d399;
+    }
+
+    .btn-3d-red {
+      background: linear-gradient(135deg, #ef4444, #b91c1c);
+      box-shadow: 0 8px 0 #7f1d1d, 0 12px 20px rgba(0,0,0,0.4);
+      border: 1px solid #fca5a5;
+    }
+
+    .btn-3d-amber {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      box-shadow: 0 8px 0 #78350f, 0 12px 20px rgba(0,0,0,0.4);
+      border: 1px solid #fcd34d;
+    }
+
+    /* Mirrored Video Background */
+    #camera-video {
+      transform: scaleX(-1);
+      object-fit: cover;
+    }
+
+    /* Custom Scrollbar for Settings */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #3b82f6;
+      border-radius: 4px;
+    }
+
+    /* Ring Progress Animation */
+    .timer-ring-circle {
+      transition: stroke-dashoffset 0.3s linear, stroke 0.3s ease;
+    }
+  </style>
+</head>
+
+<body class="h-full w-full bg-slate-950 text-white font-sans overflow-hidden relative">
+
+  <!-- CAMERA BACKGROUND VIDEO CONTAINER -->
+  <div id="camera-container" class="fixed inset-0 w-full h-full z-0 overflow-hidden bg-slate-950">
+    <video id="camera-video" autoplay playsinline muted class="w-full h-full object-cover"></video>
+    <!-- Overlay for Camera Blur Effect -->
+    <div id="camera-blur-overlay" class="absolute inset-0 bg-slate-950/60 backdrop-blur-xl transition-all duration-700 pointer-events-none"></div>
+    <!-- Fallback Pattern if Camera Unavailable -->
+    <div id="camera-fallback" class="hidden absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 opacity-90 items-center justify-center flex-col text-slate-400 p-6 text-center pointer-events-none">
+      <svg class="w-20 h-20 mb-3 opacity-40 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+      </svg>
+      <p class="font-semibold text-lg">Latar Belakang Kamera Tidak Aktif</p>
+      <p class="text-sm text-slate-500">Permainan tetap dapat dimainkan dengan tampilan latar grafis.</p>
+    </div>
+  </div>
+
+  <!-- MAIN APPLICATION CONTAINER -->
+  <div id="app-container" class="relative z-10 w-full h-full flex flex-col justify-between p-4 md:p-6 overflow-hidden">
+    
+    <!-- TOP HEADER / CONTROL STRIP -->
+    <header class="w-full flex items-center justify-between z-20">
+      <div class="flex items-center gap-3 glass-panel px-4 py-2 rounded-2xl shadow-lg border border-white/10">
+        <span class="text-2xl">🫁</span>
+        <div>
+          <h1 class="font-display font-bold text-sm md:text-base text-blue-300 leading-tight">SISTEM PERNAPASAN SD</h1>
+          <p class="text-[10px] md:text-xs text-slate-400">Uji Ketangkasan Benar / Salah</p>
+        </div>
+      </div>
+
+      <!-- CAMERA STATUS & FULLSCREEN CONTROLS -->
+      <div class="flex items-center gap-3">
+        <div id="camera-status-badge" class="hidden md:flex items-center gap-2 glass-panel px-3 py-1.5 rounded-xl text-xs font-semibold">
+          <span id="camera-status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
+          <span id="camera-status-text" class="text-slate-300">Menyiapkan Kamera...</span>
+        </div>
+
+        <button id="btn-fullscreen" onclick="toggleFullscreen()" class="glass-panel p-2.5 rounded-xl hover:bg-white/10 text-white transition-all active:scale-95" title="Layar Penuh">
+          <svg id="icon-fullscreen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- VIEW 1: MAIN MENU SCREEN -->
+    <section id="screen-menu" class="w-full h-full flex flex-col items-center justify-center my-auto transition-all duration-500 z-20">
+      <div class="max-w-2xl w-full text-center glass-panel p-8 md:p-10 rounded-3xl shadow-2xl border border-white/20 relative overflow-hidden">
+        
+        <!-- Glowing Ambient Lights -->
+        <div class="absolute -top-12 -left-12 w-40 h-40 bg-blue-500/30 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-12 -right-12 w-40 h-40 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="inline-block bg-blue-600/30 border border-blue-400/40 text-blue-200 text-xs md:text-sm font-semibold px-4 py-1.5 rounded-full mb-4 uppercase tracking-widest">
+          Game Edukasi IFP • Kelas 6 SD
+        </div>
+
+        <h2 class="font-display font-black text-3xl md:text-5xl lg:text-6xl text-transparent bg-clip-text bg-gradient-to-r from-blue-200 via-cyan-300 to-emerald-300 tracking-wide drop-shadow-md mb-2">
+          UJI KETANGKASAN
+        </h2>
+        <p class="font-display font-extrabold text-2xl md:text-4xl text-amber-400 tracking-wider mb-8 drop-shadow">
+          "BENAR ATAU SALAH"
+        </p>
+
+        <!-- Menu Action Buttons -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-5 my-6">
+          <button onclick="startGame()" class="btn-3d btn-3d-green text-white font-display font-extrabold text-xl md:text-2xl px-8 py-4 rounded-2xl w-full sm:w-auto flex items-center justify-center gap-3">
+            <span>▶</span> MULAI MAIN
+          </button>
+          
+          <button onclick="showScreen('screen-settings')" class="btn-3d btn-3d-blue text-white font-display font-bold text-lg md:text-xl px-6 py-4 rounded-2xl w-full sm:w-auto flex items-center justify-center gap-2">
+            <span>⚙</span> PENGATURAN
+          </button>
+        </div>
+
+        <!-- Game Info Badges -->
+        <div class="grid grid-cols-3 gap-3 pt-6 border-t border-white/10 text-xs md:text-sm">
+          <div class="bg-slate-900/50 p-3 rounded-xl border border-white/5">
+            <p class="text-slate-400">Total Soal</p>
+            <p id="menu-total-questions" class="font-bold text-blue-300 text-lg">15</p>
+          </div>
+          <div class="bg-slate-900/50 p-3 rounded-xl border border-white/5">
+            <p class="text-slate-400">Sesi Soal</p>
+            <p id="menu-limit-questions" class="font-bold text-emerald-300 text-lg">10</p>
+          </div>
+          <div class="bg-slate-900/50 p-3 rounded-xl border border-white/5">
+            <p class="text-slate-400">Waktu/Soal</p>
+            <p id="menu-timer-setting" class="font-bold text-amber-300 text-lg">10s</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: GAMEPLAY SCREEN -->
+    <section id="screen-game" class="hidden absolute inset-0 w-full h-full flex flex-col justify-between z-20 pointer-events-none">
+      
+      <!-- TOP OVERLAY: STATS & TIMER STRIP -->
+      <div class="w-full p-4 md:p-6 flex items-center justify-between z-30 pointer-events-auto">
+        <!-- Progress Badge -->
+        <div class="glass-panel px-4 py-2 rounded-2xl border border-white/20 flex items-center gap-3 shadow-lg">
+          <span class="text-xl">📋</span>
+          <div>
+            <p class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">PROGRESS</p>
+            <p id="game-progress" class="font-display font-extrabold text-lg md:text-xl text-blue-300">SOAL 1 / 10</p>
+          </div>
+        </div>
+
+        <!-- 3D Circular SVG Timer -->
+        <div class="relative w-20 h-20 md:w-24 md:h-24 flex items-center justify-center glass-panel rounded-full p-1 border border-white/20 shadow-2xl">
+          <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="42" stroke="rgba(255,255,255,0.1)" stroke-width="10" fill="transparent" />
+            <circle id="timer-ring" class="timer-ring-circle" cx="50" cy="50" r="42" stroke="#f59e0b" stroke-width="10" 
+                    fill="transparent" stroke-dasharray="263.89" stroke-dashoffset="0" stroke-linecap="round" />
+          </svg>
+          <div class="absolute inset-0 flex items-center justify-center flex-col">
+            <span id="timer-text" class="font-display font-black text-2xl md:text-3xl text-amber-300 drop-shadow">10</span>
+          </div>
+        </div>
+
+        <!-- Live Score Badge -->
+        <div class="glass-panel px-4 py-2 rounded-2xl border border-white/20 flex items-center gap-3 shadow-lg">
+          <span class="text-xl">⭐</span>
+          <div>
+            <p class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">SKOR AKTUEL</p>
+            <p id="game-score" class="font-display font-extrabold text-lg md:text-xl text-emerald-400">0</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CENTER TOP: FLOATING QUESTION BOX (SMALL & SLIM SO VIDEO IS VISIBLE) -->
+      <div class="w-full flex flex-col items-center justify-start px-4 z-30 pointer-events-auto -mt-2 md:-mt-4">
+        <!-- Question Box Container -->
+        <div id="question-box" class="w-full max-w-xl glass-panel rounded-2xl p-4 md:p-5 text-center shadow-2xl border-2 border-blue-400/50 transition-all duration-300">
+          <div class="inline-block bg-blue-600/40 text-blue-200 text-xs font-bold px-3 py-0.5 rounded-full mb-2 uppercase">
+            Pertanyaan
+          </div>
+          <p id="question-text" class="font-display font-bold text-lg md:text-xl lg:text-2xl text-white leading-snug drop-shadow">
+            Memuat pertanyaan...
+          </p>
+        </div>
+
+        <!-- SUB-LABELS FOR BENAR AND SALAH (PLACED DIRECTLY BELOW QUESTION BOX) -->
+        <div class="w-full max-w-2xl flex items-center justify-between px-6 mt-3">
+          <!-- Left Label: SALAH -->
+          <div class="flex items-center gap-2 bg-red-950/80 border border-red-500/60 px-4 py-1.5 rounded-full shadow-lg text-red-200 font-display font-black text-sm md:text-base">
+            <span>❌ SALAH</span>
+            <span class="text-[10px] opacity-75 font-sans font-normal">(Sisi Kiri / ◄)</span>
+          </div>
+
+          <!-- Right Label: BENAR -->
+          <div class="flex items-center gap-2 bg-emerald-950/80 border border-emerald-500/60 px-4 py-1.5 rounded-full shadow-lg text-emerald-200 font-display font-black text-sm md:text-base">
+            <span>✓ BENAR</span>
+            <span class="text-[10px] opacity-75 font-sans font-normal">(Sisi Kanan / ►)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SPLIT SCREEN INTERACTIVE TOUCH ZONES (LEFT: SALAH, RIGHT: BENAR) -->
+      <div class="absolute inset-0 w-full h-full flex z-10 pointer-events-auto">
+        
+        <!-- VERTICAL DIVIDER LINE -->
+        <div class="absolute inset-y-0 left-1/2 -translate-x-1/2 w-1.5 bg-gradient-to-b from-blue-400/40 via-white/80 to-blue-400/40 shadow-[0_0_20px_rgba(255,255,255,0.9)] z-20 pointer-events-none"></div>
+
+        <!-- LEFT SIDE: SALAH PAD -->
+        <div id="pad-salah" onclick="handleAnswer(false)" 
+             class="w-1/2 h-full bg-red-950/20 hover:bg-red-900/35 active:bg-red-900/50 transition-all duration-200 cursor-pointer flex flex-col justify-end items-start p-6 md:p-10 border-r border-white/10 group">
+          <div id="feedback-salah-badge" class="hidden glass-card bg-red-600/80 border border-red-400 text-white px-6 py-3 rounded-2xl shadow-2xl animate-bounce-gentle flex items-center gap-3">
+            <span class="text-3xl">❌</span>
+            <span class="font-display font-black text-2xl tracking-wider">SALAH</span>
+          </div>
+        </div>
+
+        <!-- RIGHT SIDE: BENAR PAD -->
+        <div id="pad-benar" onclick="handleAnswer(true)" 
+             class="w-1/2 h-full bg-emerald-950/20 hover:bg-emerald-900/35 active:bg-emerald-900/50 transition-all duration-200 cursor-pointer flex flex-col justify-end items-end p-6 md:p-10 border-l border-white/10 group">
+          <div id="feedback-benar-badge" class="hidden glass-card bg-emerald-600/80 border border-emerald-400 text-white px-6 py-3 rounded-2xl shadow-2xl animate-bounce-gentle flex items-center gap-3">
+            <span class="font-display font-black text-2xl tracking-wider">BENAR</span>
+            <span class="text-3xl">✓</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTTOM SHORTCUT FOOTER HINT -->
+      <div class="w-full text-center pb-3 text-xs text-slate-300 font-semibold drop-shadow z-30 pointer-events-none">
+        Sentuh area Kiri/Kanan atau gunakan Keyboard [ <kbd class="px-2 py-0.5 bg-slate-800 rounded border border-slate-600">◄ Panah Kiri</kbd> = SALAH | <kbd class="px-2 py-0.5 bg-slate-800 rounded border border-slate-600">Panah Kanan ►</kbd> = BENAR ]
+      </div>
+    </section>
+
+    <!-- VIEW 3: SETTINGS & QUESTION BANK SCREEN -->
+    <section id="screen-settings" class="hidden w-full h-full flex flex-col glass-panel rounded-3xl p-6 md:p-8 shadow-2xl border border-white/20 z-20 my-auto overflow-hidden">
+      
+      <!-- Settings Header -->
+      <div class="flex items-center justify-between pb-4 border-b border-white/10">
+        <div>
+          <h2 class="font-display font-bold text-2xl md:text-3xl text-blue-300 flex items-center gap-2">
+            <span>⚙</span> BANK SOAL & PENGATURAN GAME
+          </h2>
+          <p class="text-xs md:text-sm text-slate-400">Atur jumlah soal, durasi timer, serta kelola daftar pertanyaan.</p>
+        </div>
+        <button onclick="showScreen('screen-menu')" class="btn-3d btn-3d-blue text-white font-bold px-5 py-2.5 rounded-xl text-sm flex items-center gap-2">
+          <span>🏠</span> Menu Utama
+        </button>
+      </div>
+
+      <!-- Scrollable Settings Body -->
+      <div class="flex-1 overflow-y-auto my-4 pr-2 space-y-6">
+        
+        <!-- Game Configuration Row -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-900/60 p-5 rounded-2xl border border-white/10">
+          <div>
+            <label class="block text-xs font-bold text-slate-300 uppercase mb-2">Jumlah Soal Dipertandingkan</label>
+            <input type="number" id="setting-limit" min="1" max="50" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white font-bold text-lg focus:outline-none focus:border-blue-500">
+            <p class="text-[11px] text-slate-500 mt-1">Soal akan diacak secara otomatis saat permainan dimulai.</p>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-300 uppercase mb-2">Waktu Per Soal (Detik)</label>
+            <input type="number" id="setting-timer" min="3" max="60" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white font-bold text-lg focus:outline-none focus:border-amber-500">
+            <p class="text-[11px] text-slate-500 mt-1">Durasi timer hitung mundur per pertanyaan.</p>
+          </div>
+        </div>
+
+        <!-- Add New Question Form -->
+        <div class="bg-slate-900/60 p-5 rounded-2xl border border-white/10">
+          <h3 class="font-display font-bold text-lg text-emerald-400 mb-3 flex items-center gap-2">
+            <span>➕</span> Tambah Soal Baru
+          </h3>
+          <div class="flex flex-col md:flex-row gap-3">
+            <input type="text" id="add-text" placeholder="Tuliskan kalimat pertanyaan..." 
+                   class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-emerald-500">
+            <select id="add-answer" class="bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white font-bold text-sm focus:outline-none focus:border-emerald-500">
+              <option value="true">Jawaban: BENAR ✓</option>
+              <option value="false">Jawaban: SALAH ❌</option>
+            </select>
+            <button onclick="addNewQuestion()" class="btn-3d btn-3d-green text-white font-bold px-6 py-2.5 rounded-xl text-sm whitespace-nowrap">
+              + TAMBAH
+            </button>
+          </div>
+        </div>
+
+        <!-- Questions List Table / Cards -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="font-display font-bold text-lg text-blue-200">
+              Daftar Soal Tersimpan (<span id="question-count-badge">0</span>)
+            </h3>
+            <button onclick="resetDefaultQuestions()" class="text-xs text-amber-400 hover:text-amber-300 underline font-semibold flex items-center gap-1">
+              <span>↩️</span> Kembalikan Bank Soal Contoh
+            </button>
+          </div>
+
+          <!-- Questions List Container -->
+          <div id="questions-list" class="space-y-2">
+            <!-- Dynamic Questions Loaded Here -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Settings Footer Action -->
+      <div class="pt-4 border-t border-white/10 flex justify-end">
+        <button onclick="saveSettings(); showScreen('screen-menu')" class="btn-3d btn-3d-amber text-white font-bold px-8 py-3 rounded-xl text-base">
+          💾 SIMPAN PENGATURAN
+        </button>
+      </div>
+    </section>
+
+    <!-- VIEW 4: RESULTS SCREEN -->
+    <section id="screen-result" class="hidden w-full h-full flex flex-col items-center justify-center my-auto transition-all duration-500 z-20">
+      <div class="max-w-xl w-full text-center glass-panel p-8 md:p-10 rounded-3xl shadow-2xl border border-white/20 relative overflow-hidden">
+        
+        <div class="inline-block bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs md:text-sm font-bold px-4 py-1.5 rounded-full mb-3 uppercase tracking-widest">
+          PERMAINAN SELESAI!
+        </div>
+
+        <h2 class="font-display font-black text-3xl md:text-4xl text-white mb-2">HASIL AKHIR</h2>
+        
+        <!-- Score Circle Badge -->
+        <div class="my-6 inline-flex items-center justify-center w-36 h-36 rounded-full bg-gradient-to-br from-blue-600 to-indigo-800 border-4 border-white/30 shadow-2xl relative">
+          <div class="text-center">
+            <span id="result-final-score" class="font-display font-black text-5xl text-yellow-300 leading-none block">0</span>
+            <span class="text-xs text-blue-200 font-bold uppercase tracking-wider">SKOR AKHIR</span>
+          </div>
+        </div>
+
+        <!-- Performance Feedback Message -->
+        <p id="result-feedback-text" class="font-display font-bold text-xl md:text-2xl text-emerald-300 mb-6">
+          Luar biasa! Pengetahuanmu sangat tinggi!
+        </p>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-3 gap-3 mb-8 text-center text-xs md:text-sm">
+          <div class="bg-emerald-950/60 border border-emerald-500/40 p-3 rounded-2xl">
+            <p class="text-emerald-400 font-semibold mb-1">✓ BENAR</p>
+            <p id="result-correct" class="font-display font-black text-2xl text-white">0</p>
+          </div>
+          <div class="bg-red-950/60 border border-red-500/40 p-3 rounded-2xl">
+            <p class="text-red-400 font-semibold mb-1">❌ SALAH</p>
+            <p id="result-wrong" class="font-display font-black text-2xl text-white">0</p>
+          </div>
+          <div class="bg-slate-900/60 border border-slate-600/40 p-3 rounded-2xl">
+            <p class="text-slate-400 font-semibold mb-1">⏳ TIMEOUT</p>
+            <p id="result-timeout" class="font-display font-black text-2xl text-white">0</p>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <button onclick="startGame()" class="btn-3d btn-3d-green text-white font-display font-extrabold text-lg px-8 py-3.5 rounded-2xl flex items-center justify-center gap-2">
+            <span>🔄</span> MAIN LAGI
+          </button>
+          <button onclick="showScreen('screen-menu')" class="btn-3d btn-3d-blue text-white font-display font-bold text-lg px-6 py-3.5 rounded-2xl flex items-center justify-center gap-2">
+            <span>🏠</span> MENU UTAMA
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+
+  <!-- MODAL: EDIT QUESTION -->
+  <div id="modal-edit" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="glass-panel max-w-lg w-full rounded-3xl p-6 shadow-2xl border border-white/20">
+      <h3 class="font-display font-bold text-xl text-blue-300 mb-4 flex items-center gap-2">
+        <span>✏️</span> EDIT PERTANYAAN
+      </h3>
+      <input type="hidden" id="edit-id">
+      
+      <div class="space-y-4 mb-6">
+        <div>
+          <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Pertanyaan</label>
+          <textarea id="edit-text" rows="3" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-blue-500"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Jawaban Benar</label>
+          <select id="edit-answer" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white font-bold text-sm focus:outline-none focus:border-blue-500">
+            <option value="true">BENAR ✓</option>
+            <option value="false">SALAH ❌</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3">
+        <button onclick="closeEditModal()" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-sm">
+          BATAL
+        </button>
+        <button onclick="saveEditQuestion()" class="btn-3d btn-3d-blue px-6 py-2.5 rounded-xl text-white font-bold text-sm">
+          💾 SIMPAN PERUBAHAN
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CONFIRM DELETE -->
+  <div id="modal-confirm" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="glass-panel max-w-md w-full rounded-3xl p-6 shadow-2xl border border-white/20 text-center">
+      <div class="w-16 h-16 bg-red-500/20 text-red-400 border border-red-500/40 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
+        ⚠️
+      </div>
+      <h3 class="font-display font-bold text-xl text-white mb-2">Hapus Soal Ini?</h3>
+      <p class="text-xs text-slate-300 mb-6">Tindakan ini tidak dapat dibatalkan.</p>
+      
+      <div class="flex justify-center gap-3">
+        <button onclick="closeConfirmModal()" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-sm">
+          BATAL
+        </button>
+        <button id="btn-confirm-delete" class="btn-3d btn-3d-red px-6 py-2.5 rounded-xl text-white font-bold text-sm">
+          🗑️ HAPUS
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // WEB AUDIO API SYNTHESIZER FOR SOUND EFFECTS
+    class SoundEffects {
+      constructor() {
+        this.ctx = null;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playClick() {
+        this.init();
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(200, this.ctx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.08);
+      }
+
+      playCorrect() {
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+          gain.gain.setValueAtTime(0.25, now + idx * 0.07);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.3);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + idx * 0.07);
+          osc.stop(now + idx * 0.07 + 0.3);
+        });
+      }
+
+      playWrong() {
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.linearRampToValueAtTime(110, now + 0.3);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      }
+
+      playTick() {
+        this.init();
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+        gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.05);
+      }
+
+      playFinish() {
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const fanfare = [392.00, 523.25, 659.25, 783.99]; // G4, C5, E5, G5
+        fanfare.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+          gain.gain.setValueAtTime(0.3, now + idx * 0.12);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.4);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + idx * 0.12);
+          osc.stop(now + idx * 0.12 + 0.4);
+        });
+      }
+    }
+
+    const sound = new SoundEffects();
+
+    // DEFAULT QUESTIONS BANK (Class 6 SD Respiratory System)
+    const DEFAULT_QUESTIONS = [
+      { id: 1, text: "Alveolus merupakan tempat terjadinya pertukaran oksigen dan karbon dioksida di dalam paru-paru.", answer: true },
+      { id: 2, text: "Rambut hidung dan selaput lendir berfungsi untuk menyaring debu dan kotoran yang masuk bersama udara.", answer: true },
+      { id: 3, text: "Diafragma akan mengendur dan mendatar ketika kita menghembuskan napas (ekspirasi).", answer: false },
+      { id: 4, text: "Trakea (tenggorokan) terbagi menjadi dua cabang utama yang disebut bronkus.", answer: true },
+      { id: 5, text: "Gas yang kita hirup saat bernapas dan paling dibutuhkan oleh tubuh adalah karbon dioksida.", answer: false },
+      { id: 6, text: "Paru-paru sebelah kanan manusia terdiri dari 2 gelambir (lobus).", answer: false },
+      { id: 7, text: "Cincin tulang rawan pada trakea berfungsi menjaga agar saluran pernapasan tetap terbuka.", answer: true },
+      { id: 8, text: "Otot diafragma berkontraksi dan mendatar saat kita menghirup udara (inhalasi).", answer: true },
+      { id: 9, text: "Penyakit Tuberkulosis (TBC) disebabkan oleh infeksi bakteri Mycobacterium tuberculosis.", answer: true },
+      { id: 10, text: "Asma adalah gangguan pernapasan berupa peradangan kronis pada alveolus.", answer: false },
+      { id: 11, text: "Pleura adalah selaput tipis yang membungkus paru-paru.", answer: true },
+      { id: 12, text: "Pita suara manusia terletak di dalam organ faring.", answer: false },
+      { id: 13, text: "Kebiasaan merokok dapat merusak rambut-rambut getar (silia) pada saluran pernapasan.", answer: true },
+      { id: 14, text: "Proses menghembuskan atau mengeluarkan udara dari dalam paru-paru disebut ekspirasi.", answer: true },
+      { id: 15, text: "Udara yang masuk melalui mulut langsung ke paru-paru tanpa melewati tenggorokan.", answer: false }
+    ];
+
+    // STATE VARIABLES
+    let questions = [];
+    let activeQuestions = [];
+    let currentQuestionIdx = 0;
+    let limitQuestions = 10;
+    let timerPerQuestion = 10;
+    let currentTimer = 10;
+    let timerInterval = null;
+    let score = 0;
+    let stats = { correct: 0, wrong: 0, timeout: 0 };
+    let inputLocked = false;
+    let pendingDeleteId = null;
+
+    // INITIALIZATION & STORAGE HANDLERS
+    function loadDataFromStorage() {
+      const storedQuestions = localStorage.getItem('ifp_questions');
+      if (storedQuestions) {
+        try {
+          questions = JSON.parse(storedQuestions);
+        } catch (e) {
+          questions = [...DEFAULT_QUESTIONS];
+        }
+      } else {
+        questions = [...DEFAULT_QUESTIONS];
+        localStorage.setItem('ifp_questions', JSON.stringify(questions));
+      }
+
+      const storedLimit = localStorage.getItem('ifp_limit');
+      limitQuestions = storedLimit ? parseInt(storedLimit) : 10;
+
+      const storedTimer = localStorage.getItem('ifp_timer');
+      timerPerQuestion = storedTimer ? parseInt(storedTimer) : 10;
+
+      updateSettingsUI();
+    }
+
+    function saveDataToStorage() {
+      localStorage.setItem('ifp_questions', JSON.stringify(questions));
+      localStorage.setItem('ifp_limit', limitQuestions.toString());
+      localStorage.setItem('ifp_timer', timerPerQuestion.toString());
+      updateSettingsUI();
+    }
+
+    function updateSettingsUI() {
+      document.getElementById('setting-limit').value = limitQuestions;
+      document.getElementById('setting-timer').value = timerPerQuestion;
+      document.getElementById('menu-total-questions').textContent = questions.length;
+      document.getElementById('menu-limit-questions').textContent = limitQuestions;
+      document.getElementById('menu-timer-setting').textContent = timerPerQuestion + 's';
+      document.getElementById('question-count-badge').textContent = questions.length;
+      renderQuestionsList();
+    }
+
+    // IFP CAMERA CONTROLLER
+    async function initCamera() {
+      const video = document.getElementById('camera-video');
+      const fallback = document.getElementById('camera-fallback');
+      const statusBadge = document.getElementById('camera-status-badge');
+      const statusDot = document.getElementById('camera-status-dot');
+      const statusText = document.getElementById('camera-status-text');
+
+      statusBadge.classList.remove('hidden');
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: false
+        });
+        video.srcObject = stream;
+        video.onloadedmetadata = () => {
+          video.play();
+          statusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]";
+          statusText.textContent = "Kamera IFP Aktif";
+        };
+      } catch (err) {
+        console.warn("Kamera tidak dapat diakses:", err);
+        fallback.classList.remove('hidden');
+        fallback.classList.add('flex');
+        statusDot.className = "w-2.5 h-2.5 rounded-full bg-red-500";
+        statusText.textContent = "Kamera Nonaktif";
+      }
+    }
+
+    // SCREEN NAVIGATION
+    function showScreen(screenId) {
+      sound.playClick();
+      const screens = ['screen-menu', 'screen-game', 'screen-settings', 'screen-result'];
+      screens.forEach(id => {
+        const el = document.getElementById(id);
+        if (id === screenId) {
+          el.classList.remove('hidden');
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      const blurOverlay = document.getElementById('camera-blur-overlay');
+      if (screenId === 'screen-game') {
+        blurOverlay.style.backdropFilter = 'blur(3px)';
+        blurOverlay.style.backgroundColor = 'rgba(15, 23, 42, 0.3)';
+      } else {
+        blurOverlay.style.backdropFilter = 'blur(16px)';
+        blurOverlay.style.backgroundColor = 'rgba(15, 23, 42, 0.6)';
+      }
+    }
+
+    // GAME ENGINE & LOGIC
+    function startGame() {
+      if (questions.length === 0) {
+        alert("Bank soal kosong! Silakan tambah soal di Pengaturan.");
+        return;
+      }
+
+      // Shuffle Questions Array
+      const shuffled = [...questions].sort(() => Math.random() - 0.5);
+      const effectiveLimit = Math.min(limitQuestions, questions.length);
+      activeQuestions = shuffled.slice(0, effectiveLimit);
+
+      currentQuestionIdx = 0;
+      score = 0;
+      stats = { correct: 0, wrong: 0, timeout: 0 };
+      inputLocked = false;
+
+      document.getElementById('game-score').textContent = score;
+      showScreen('screen-game');
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      if (currentQuestionIdx >= activeQuestions.length) {
+        endGame();
+        return;
+      }
+
+      inputLocked = false;
+      resetFeedbackUI();
+
+      const q = activeQuestions[currentQuestionIdx];
+      document.getElementById('question-text').textContent = q.text;
+      document.getElementById('game-progress').textContent = `SOAL ${currentQuestionIdx + 1} / ${activeQuestions.length}`;
+
+      startTimer();
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      currentTimer = timerPerQuestion;
+      updateTimerUI();
+
+      timerInterval = setInterval(() => {
+        currentTimer--;
+        updateTimerUI();
+
+        if (currentTimer <= 3 && currentTimer > 0) {
+          sound.playTick();
+        }
+
+        if (currentTimer <= 0) {
+          clearInterval(timerInterval);
+          handleTimeout();
+        }
+      }, 1000);
+    }
+
+    function updateTimerUI() {
+      const text = document.getElementById('timer-text');
+      const ring = document.getElementById('timer-ring');
+      text.textContent = currentTimer;
+
+      const totalDash = 263.89;
+      const progress = currentTimer / timerPerQuestion;
+      const dashoffset = totalDash * (1 - progress);
+      ring.style.strokeDashoffset = dashoffset;
+
+      if (currentTimer <= 3) {
+        ring.style.stroke = "#ef4444";
+        text.className = "font-display font-black text-2xl md:text-3xl text-red-500 animate-pulse-fast drop-shadow";
+      } else if (currentTimer <= 5) {
+        ring.style.stroke = "#f59e0b";
+        text.className = "font-display font-black text-2xl md:text-3xl text-amber-400 drop-shadow";
+      } else {
+        ring.style.stroke = "#10b981";
+        text.className = "font-display font-black text-2xl md:text-3xl text-emerald-400 drop-shadow";
+      }
+    }
+
+    // ANSWER PROCESSING
+    function handleAnswer(userChoice) {
+      if (inputLocked) return;
+      inputLocked = true;
+      clearInterval(timerInterval);
+
+      const q = activeQuestions[currentQuestionIdx];
+      const isCorrect = (userChoice === q.answer);
+
+      if (isCorrect) {
+        score += 10;
+        stats.correct++;
+        sound.playCorrect();
+        document.getElementById('game-score').textContent = score;
+      } else {
+        stats.wrong++;
+        sound.playWrong();
+      }
+
+      showAnswerFeedback(userChoice, q.answer, isCorrect);
+
+      setTimeout(() => {
+        currentQuestionIdx++;
+        loadQuestion();
+      }, 1600);
+    }
+
+    function handleTimeout() {
+      if (inputLocked) return;
+      inputLocked = true;
+      stats.timeout++;
+      sound.playWrong();
+
+      const q = activeQuestions[currentQuestionIdx];
+      showAnswerFeedback(null, q.answer, false);
+
+      setTimeout(() => {
+        currentQuestionIdx++;
+        loadQuestion();
+      }, 1600);
+    }
+
+    function showAnswerFeedback(userChoice, correctAnswer, isCorrect) {
+      const padSalah = document.getElementById('pad-salah');
+      const padBenar = document.getElementById('pad-benar');
+      const qBox = document.getElementById('question-text');
+      const badgeSalah = document.getElementById('feedback-salah-badge');
+      const badgeBenar = document.getElementById('feedback-benar-badge');
+
+      if (correctAnswer === true) {
+        // Correct answer is BENAR (Right Side Glows Green)
+        padBenar.classList.add('bg-emerald-600/50', 'animate-glow-green', 'scale-[1.01]');
+        badgeBenar.classList.remove('hidden');
+
+        if (userChoice === false) {
+          padSalah.classList.add('bg-red-900/60');
+          badgeSalah.classList.remove('hidden');
+        }
+      } else {
+        // Correct answer is SALAH (Left Side Glows Red)
+        padSalah.classList.add('bg-red-600/50', 'animate-glow-red', 'scale-[1.01]');
+        badgeSalah.classList.remove('hidden');
+
+        if (userChoice === true) {
+          padBenar.classList.add('bg-emerald-900/60');
+          badgeBenar.classList.remove('hidden');
+        }
+      }
+    }
+
+    function resetFeedbackUI() {
+      const padSalah = document.getElementById('pad-salah');
+      const padBenar = document.getElementById('pad-benar');
+      const badgeSalah = document.getElementById('feedback-salah-badge');
+      const badgeBenar = document.getElementById('feedback-benar-badge');
+
+      padSalah.className = "w-1/2 h-full bg-red-950/20 hover:bg-red-900/35 active:bg-red-900/50 transition-all duration-200 cursor-pointer flex flex-col justify-end items-start p-6 md:p-10 border-r border-white/10 group";
+      padBenar.className = "w-1/2 h-full bg-emerald-950/20 hover:bg-emerald-900/35 active:bg-emerald-900/50 transition-all duration-200 cursor-pointer flex flex-col justify-end items-end p-6 md:p-10 border-l border-white/10 group";
+
+      badgeSalah.classList.add('hidden');
+      badgeBenar.classList.add('hidden');
+    }
+
+    // END GAME & RESULTS
+    function endGame() {
+      clearInterval(timerInterval);
+      sound.playFinish();
+
+      const totalAsked = activeQuestions.length;
+      const maxPossibleScore = totalAsked * 10;
+      
+      document.getElementById('result-final-score').textContent = score;
+      document.getElementById('result-correct').textContent = stats.correct;
+      document.getElementById('result-wrong').textContent = stats.wrong;
+      document.getElementById('result-timeout').textContent = stats.timeout;
+
+      const feedbackEl = document.getElementById('result-feedback-text');
+      const percentage = (score / maxPossibleScore) * 100;
+
+      if (percentage >= 80) {
+        feedbackEl.textContent = "🌟 Sangat Luar Biasa! Pemahaman Sistem Pernapasanmu Sangat Sempurna!";
+        feedbackEl.className = "font-display font-bold text-xl md:text-2xl text-emerald-300 mb-6";
+      } else if (percentage >= 60) {
+        feedbackEl.textContent = "👍 Bagus Sekali! Kamu Sudah Memahami Materi Ini Dengan Baik!";
+        feedbackEl.className = "font-display font-bold text-xl md:text-2xl text-cyan-300 mb-6";
+      } else {
+        feedbackEl.textContent = "📚 Tetap Semangat! Buka Kembali Buku Pelajaran Dan Coba Lagi Ya!";
+        feedbackEl.className = "font-display font-bold text-xl md:text-2xl text-amber-300 mb-6";
+      }
+
+      showScreen('screen-result');
+    }
+
+    // QUESTIONS BANK CRUD
+    function renderQuestionsList() {
+      const container = document.getElementById('questions-list');
+      container.innerHTML = '';
+
+      questions.forEach((q, idx) => {
+        const card = document.createElement('div');
+        card.className = "bg-slate-900/70 border border-white/10 rounded-xl p-3 flex items-center justify-between gap-3 hover:border-blue-500/50 transition-all";
+        
+        card.innerHTML = `
+          <div class="flex items-center gap-3 overflow-hidden">
+            <span class="font-bold text-xs text-slate-500 w-6">#${idx + 1}</span>
+            <span class="text-xs md:text-sm text-slate-200 truncate">${escapeHtml(q.text)}</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${q.answer ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/30' : 'bg-red-950 text-red-300 border border-red-500/30'}">
+              ${q.answer ? 'BENAR' : 'SALAH'}
+            </span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="openEditModal(${q.id})" class="p-1.5 rounded-lg bg-blue-600/30 hover:bg-blue-600/60 text-blue-300 text-xs transition-all" title="Edit">✏️</button>
+            <button onclick="promptDeleteQuestion(${q.id})" class="p-1.5 rounded-lg bg-red-600/30 hover:bg-red-600/60 text-red-300 text-xs transition-all" title="Hapus">🗑️</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function addNewQuestion() {
+      const textInput = document.getElementById('add-text');
+      const answerInput = document.getElementById('add-answer');
+      const text = textInput.value.trim();
+
+      if (!text) {
+        alert("Silakan masukkan teks pertanyaan terlebih dahulu.");
+        return;
+      }
+
+      const newQ = {
+        id: Date.now(),
+        text: text,
+        answer: (answerInput.value === 'true')
+      };
+
+      questions.push(newQ);
+      textInput.value = '';
+      saveDataToStorage();
+      sound.playClick();
+    }
+
+    function openEditModal(id) {
+      const q = questions.find(item => item.id === id);
+      if (!q) return;
+
+      document.getElementById('edit-id').value = q.id;
+      document.getElementById('edit-text').value = q.text;
+      document.getElementById('edit-answer').value = q.answer ? 'true' : 'false';
+      
+      document.getElementById('modal-edit').classList.remove('hidden');
+    }
+
+    function closeEditModal() {
+      document.getElementById('modal-edit').classList.add('hidden');
+    }
+
+    function saveEditQuestion() {
+      const id = parseInt(document.getElementById('edit-id').value);
+      const text = document.getElementById('edit-text').value.trim();
+      const answer = (document.getElementById('edit-answer').value === 'true');
+
+      if (!text) {
+        alert("Teks pertanyaan tidak boleh kosong.");
+        return;
+      }
+
+      const idx = questions.findIndex(q => q.id === id);
+      if (idx !== -1) {
+        questions[idx].text = text;
+        questions[idx].answer = answer;
+        saveDataToStorage();
+        closeEditModal();
+        sound.playClick();
+      }
+    }
+
+    function promptDeleteQuestion(id) {
+      if (questions.length <= 1) {
+        alert("Minimal harus ada 1 soal tersisa di Bank Soal!");
+        return;
+      }
+      pendingDeleteId = id;
+      document.getElementById('modal-confirm').classList.remove('hidden');
+    }
+
+    function closeConfirmModal() {
+      pendingDeleteId = null;
+      document.getElementById('modal-confirm').classList.add('hidden');
+    }
+
+    document.getElementById('btn-confirm-delete').addEventListener('click', () => {
+      if (pendingDeleteId !== null) {
+        questions = questions.filter(q => q.id !== pendingDeleteId);
+        saveDataToStorage();
+        closeConfirmModal();
+        sound.playClick();
+      }
+    });
+
+    function resetDefaultQuestions() {
+      if (confirm("Kembalikan seluruh Bank Soal ke Soal Contoh awal? Soal buatan Anda akan terhapus.")) {
+        questions = [...DEFAULT_QUESTIONS];
+        saveDataToStorage();
+        sound.playClick();
+      }
+    }
+
+    function saveSettings() {
+      const limitInput = parseInt(document.getElementById('setting-limit').value);
+      const timerInput = parseInt(document.getElementById('setting-timer').value);
+
+      limitQuestions = isNaN(limitInput) || limitInput < 1 ? 10 : limitInput;
+      timerPerQuestion = isNaN(timerInput) || timerInput < 3 ? 10 : timerInput;
+
+      saveDataToStorage();
+    }
+
+    // KEYBOARD CONTROLS & UTILITIES
+    document.addEventListener('keydown', (e) => {
+      // Ignore keyboard shortcut if editing input fields
+      const activeEl = document.activeElement;
+      if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'SELECT')) {
+        if (e.key === 'Escape') {
+          closeEditModal();
+          closeConfirmModal();
+        }
+        return;
+      }
+
+      if (e.key === 'Escape') {
+        closeEditModal();
+        closeConfirmModal();
+      }
+
+      const gameScreen = document.getElementById('screen-game');
+      if (!gameScreen.classList.contains('hidden')) {
+        if (e.key === 'ArrowLeft') {
+          handleAnswer(false);
+        } else if (e.key === 'ArrowRight') {
+          handleAnswer(true);
+        }
+      }
+    });
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+          console.warn("Fullscreen request error:", err);
+        });
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+    }
+
+    // APPLICATION ENTRY POINT
+    window.onload = () => {
+      loadDataFromStorage();
+      initCamera();
+    };
+  </script>
+</body>
+</html>
